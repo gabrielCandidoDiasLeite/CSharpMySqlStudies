@@ -25,32 +25,40 @@ namespace TestsCSharpMySQL
             MySqlConnection connection = new MySqlConnection(connectionInfo.MySQLConnectionString());
 
             string email = emailTextBox.Text;
-
-            if(email == "")
+            try
             {
-                MessageBox.Show("Digite seu e-mail para acessar o sistema!");
-                return;
+                connection.Open();
+
+                if (email == "")
+                {
+                    MessageBox.Show("Digite seu e-mail para acessar o sistema!");
+                    return;
+                }
+
+                string query = new string(
+                    $"SELECT * FROM users WHERE email = '{email}'"
+                    );
+
+                MySqlDataAdapter adapter = new MySqlDataAdapter(query, connection);
+                DataTable dataTable = new DataTable();
+                adapter.Fill(dataTable);
+
+                if (dataTable.Rows.Count == 0)
+                {
+                    MessageBox.Show("E-mail não cadastrado no sistema!");
+                    emailTextBox.Text = "";
+                }
+                else
+                {
+                    this.Hide();
+                    emailTextBox.Text = "";
+                    menu.ShowDialog();
+                    return;
+                }
             }
-
-            string query = new string(
-                $"SELECT * FROM users WHERE email = '{email}'"
-                );
-
-            MySqlDataAdapter adapter = new MySqlDataAdapter(query, connection);
-            DataTable dataTable = new DataTable();
-            adapter.Fill(dataTable);
-
-            if(dataTable.Rows.Count == 0 ) 
+            catch (Exception ex)
             {
-                MessageBox.Show("E-mail não cadastrado no sistema!"); 
-                emailTextBox.Text = "";
-            }
-            else
-            {
-                this.Hide();
-                emailTextBox.Text = "";
-                menu.ShowDialog();
-                return;
+                MessageBox.Show($"Error: {ex.Message}");
             }
         }
 
